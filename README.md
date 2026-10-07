@@ -133,4 +133,4 @@ Les contributions, suggestions et ajouts de nouveaux paquets de questions/amorce
 
 Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
-[Party Games Suite (Priorities & Quick Splash)](https://drive.google.com/file/d/1n2g94E2Asp6kjcFohE_pKkJXkJ34QEEN/view?usp=sharing)
+[Party Games Suite (Priorities & Quick Splash)]((https://drive.google.com/drive/folders/1L5JPPSpPfGNMt1l7U4rDU0UX8D0cb858?usp=sharing))
