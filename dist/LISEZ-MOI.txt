@@ -1,0 +1,18 @@
+==============================================================
+   PRIORITIES - JEU D'AMBIANCE LOCAL (VERSION STANDALONE .EXE)
+==============================================================
+
+COMMENT JOUER :
+1. Double-cliquez simplement sur "priorities.exe".
+2. Une fenetre de commande s'ouvre et demarre le serveur.
+3. Votre navigateur par defaut s'ouvre automatiquement sur l'ecran TV (http://localhost:3000/tv).
+4. Vos amis scannent le QR Code affiche sur la TV avec leur telephone portable.
+5. Amusez-vous bien !
+
+PERSONNALISATION DES MOTS ET THEMES :
+- Le dossier "data/themes.json" vous permet de rajouter ou modifier vos propres mots et themes facilement.
+- Si le fichier est supprime, le jeu le recreera automatiquement avec les 200+ mots par defaut.
+
+RESEAU :
+- Les joueurs sur mobile doivent etre connectes au meme reseau Wi-Fi que l'ordinateur qui lance le jeu.
+- En cas de pare-feu Windows demandant l'acces reseau au premier lancement, cliquez sur "Autoriser l'acces".

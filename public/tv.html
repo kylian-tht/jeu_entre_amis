@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0c0824">
+  <title>Priorities - Écran TV</title>
+  <link rel="icon" type="image/jpeg" href="/favicon.jpg">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="tv">
+  <!-- Fond animé d'ambiance Soirée / Nightclub (Orbes de lumière et bokeh) -->
+  <div class="fond-ambiance-soiree" aria-hidden="true">
+    <div class="orbe orbe-1"></div>
+    <div class="orbe orbe-2"></div>
+    <div class="orbe orbe-3"></div>
+  </div>
+
+  <!-- Effet visuel d'onde de choc multi-anneaux pour changement de mode -->
+  <div id="onde-de-choc" class="onde-de-choc-conteneur" aria-hidden="true">
+    <div class="onde-flash"></div>
+    <div class="onde-anneau anneau-1"></div>
+    <div class="onde-anneau anneau-2"></div>
+    <div class="onde-anneau anneau-3"></div>
+  </div>
+
+  <main id="app">
+    <header class="tv-entete-soiree">
+      <button id="btn-roue-tv" type="button" class="btn-roue-tv" title="Gestion des joueurs (Modération TV)" aria-label="Gestion des joueurs">⚙️</button>
+      <button id="btn-scoreboard-tv" type="button" class="btn-scoreboard-tv" title="Scoreboard & Statistiques des joueurs">🏆 Scoreboard</button>
+      <button id="btn-switch-mode-tv" type="button" class="btn-switch-mode-tv" title="Basculer le mode de jeu (Priorities / Quick Splash)">
+        <span class="switch-mode-icone">🔄</span>
+        <span class="switch-mode-texte" id="tv-switch-mode-texte">Mode Quick Splash</span>
+      </button>
+      <div id="tv-badge-soiree" class="badge-soiree-tv">🍸 PRIORITIES NIGHT CLUB 🪩</div>
+      <h1 id="tv-titre-principal" class="titre-soiree-neon">Priorities</h1>
+    </header>
+
+    <!-- LOBBY : Ambiance Soirée, VIP Pass QR Code & Invités -->
+    <section id="tv-lobby">
+      <div class="tv-colonnes tv-colonnes-soiree">
+        <!-- Carte VIP QR Code stylisée -->
+        <div class="tv-carte-vip-pass">
+          <div class="vip-pass-ruban">
+            <span class="vip-pill">✨ PASS VIP</span>
+            <span class="vip-live-dot">● EN DIRECT</span>
+          </div>
+          <h3 class="vip-titre-invitation">REJOINDRE LA SOIRÉE</h3>
+          <div class="vip-qr-cadre">
+            <img id="qr" alt="QR code de connexion" class="cache">
+          </div>
+          <div class="vip-pass-infos">
+            <p id="url" class="tv-url vip-url"></p>
+            <p class="vip-consigne">📱 Scanne avec ton appareil photo pour entrer</p>
+          </div>
+        </div>
+
+        <!-- Liste des invités VIP -->
+        <div class="tv-joueurs tv-joueurs-soiree">
+          <div class="tv-joueurs-header">
+            <h2 id="titre-joueurs">Invités VIP</h2>
+            <div id="tv-badge-compteur" class="badge-compteur-soiree">0 / 12</div>
+          </div>
+          <ul id="liste-joueurs" class="liste-joueurs-soiree"></ul>
+          <p id="message" class="tv-message"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VOTE : les thèmes proposés et qui a déjà voté -->
+    <section id="tv-vote" class="cache">
+      <p class="sous-titre grand">🗳️ Votez pour le thème de la partie sur votre téléphone !</p>
+      <div id="tv-themes" class="liste-themes tv-themes"></div>
+      <ul id="tv-votants" class="liste-joueurs ligne"></ul>
+      <p id="tv-compteur-votes" class="tv-message"></p>
+    </section>
+
+    <!-- ANNONCE : thème gagnant / roulette du destin -->
+    <section id="tv-annonce" class="cache">
+      <div id="tv-zone-annonce" class="zone-annonce grande"></div>
+    </section>
+
+    <!-- CLASSEMENT PERSONNEL EN COURS (Dashboard 1 écran) -->
+    <section id="tv-classement" class="tv-dashboard cache">
+      <header class="tv-classement-header">
+        <div class="tv-header-gauche">
+          <span id="tv-badge-manche" class="badge-manche grand">Manche 1 / 4</span>
+          <h2 id="tv-titre-theme" class="titre-theme-tv">Thème</h2>
+        </div>
+        <div id="tv-consignes" class="tv-consignes-ruban"></div>
+      </header>
+
+      <div class="tv-dashboard-grille">
+        <!-- Colonne 1 : Les 5 mots tirés -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">📋</span>
+            <span>Les 5 mots de la manche</span>
+          </div>
+          <div id="tv-liste-mots-manche" class="tv-liste-mots-verticale"></div>
+          <div id="tv-reroll-bandeau" class="tv-reroll-bandeau cache">
+            <div id="tv-reroll-texte">🎲 Vote pour changer les mots : <strong>0/0</strong></div>
+            <div id="tv-reroll-avatars" class="tv-reroll-avatars"></div>
+          </div>
+        </div>
+
+        <!-- Colonne 2 : Avancement des joueurs -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">👥</span>
+            <span>Avancement des joueurs</span>
+          </div>
+          <div class="tv-progression-barre-box">
+            <p id="tv-compteur-classes" class="tv-compteur-highlight">0 / 0 validés</p>
+          </div>
+          <ul id="tv-joueurs-classement" class="tv-grille-joueurs-statut"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSITION AVANT DÉBAT -->
+    <section id="tv-termine" class="cache">
+      <div class="zone-annonce grande">
+        <p class="annonce-titre">🎉 Tous les classements individuels sont validés !</p>
+        <div class="annonce-nom gagnant">Place au débat ! 🗣️</div>
+        <p class="annonce-sous">Le groupe va devoir débattre pour établir le classement collectif.</p>
+      </div>
+    </section>
+
+    <!-- PHASE DE DÉBAT (Étape 5) -->
+    <section id="tv-debat" class="tv-dashboard cache">
+      <header class="tv-classement-header">
+        <div class="tv-header-gauche">
+          <span id="tv-badge-manche-debat" class="badge-manche grand">Manche 1 / 4</span>
+          <h2 class="titre-theme-tv">🗣️ Phase de Débat</h2>
+        </div>
+        <div class="tv-timer-box">
+          <span class="icone-timer">⏱️</span>
+          <span id="tv-compteur-temps-debat" class="tv-timer-texte">03:00</span>
+          <span id="tv-statut-joker-badge" class="badge-joker-actif">🃏 Joker : 2 min</span>
+        </div>
+      </header>
+
+      <div class="tv-dashboard-grille">
+        <!-- Colonne 1 : Classement du groupe en direct -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">🎯</span>
+            <span>Classement du groupe en direct</span>
+          </div>
+          <div id="tv-liste-mots-groupe" class="tv-liste-mots-verticale"></div>
+        </div>
+
+        <!-- Colonne 2 : Capitaine et consignes -->
+        <div class="tv-carte-panneau tv-panneau-capitaine">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">👑</span>
+            <span id="tv-nom-capitaine">Capitaine : ...</span>
+          </div>
+          <div class="tv-debat-instructions">
+            <p class="tv-texte-important">Le Capitaine manipule les cartes sur son smartphone pour refléter l'avis du groupe.</p>
+            <p class="compteur">Débattez ensemble à l'oral pour trouver le meilleur compromis !</p>
+            <div class="tv-joker-rappel">
+              <span class="emoji-petit">🃏</span>
+              <span><strong>Joker secret :</strong> Chaque joueur peut changer secrètement son classement personnel pendant les 2 premières minutes.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteneur d'affichage des réactions flottantes en direct -->
+      <div id="tv-reactions-container" class="tv-reactions-flottantes-zone"></div>
+    </section>
+
+    <!-- FIN DU DÉBAT (validation par le capitaine) -->
+    <section id="tv-debat-termine" class="cache">
+      <div class="zone-annonce grande">
+        <p class="annonce-titre">🏁 Classement du groupe validé !</p>
+        <div class="annonce-nom gagnant">Calcul des scores... 📊</div>
+        <p class="annonce-sous">Comparaison entre vos classements secrets et le classement du groupe !</p>
+      </div>
+    </section>
+
+    <!-- RÉSULTATS DE LA MANCHE (Étape 6) -->
+    <section id="tv-resultats-manche" class="tv-dashboard cache">
+      <header class="tv-classement-header">
+        <div class="tv-header-gauche">
+          <span id="tv-badge-manche-resultats" class="badge-manche grand">Manche 1 / 4</span>
+          <h2 class="titre-theme-tv">📊 Scores de la manche</h2>
+        </div>
+        <div class="tv-consignes-ruban vert">
+          <span>🎯 Distance 0 = +3 pts · Distance 1 = +1 pt · Autre = 0 pt</span>
+        </div>
+      </header>
+
+      <div class="tv-dashboard-grille">
+        <!-- Colonne 1 : Classement officiel du groupe -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">🎯</span>
+            <span>Ordre du groupe (référence)</span>
+          </div>
+          <div id="tv-resultats-ordre-groupe" class="tv-liste-mots-verticale"></div>
+        </div>
+
+        <!-- Colonne 2 : Scores des joueurs -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">🏆</span>
+            <span>Points marqués cette manche</span>
+          </div>
+          <div id="tv-resultats-liste-joueurs" class="tv-liste-scores-joueurs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PODIUM & FIN DE PARTIE (Étape 6) -->
+    <section id="tv-fin-partie" class="tv-dashboard cache">
+      <header class="tv-classement-header centrer">
+        <h2 class="titre-theme-tv grand-titre">🏆 Podium Final 🏆</h2>
+      </header>
+
+      <!-- Podium Visuel Top 3 -->
+      <div id="tv-podium-visuel" class="tv-podium-conteneur"></div>
+
+      <!-- Trophées humoristiques (Le Caméléon, L'Incompris, Le Stratège) -->
+      <div id="tv-zone-trophees" class="tv-trophees-ligne"></div>
+
+      <!-- Grille Récapitulatif : Matrice des Manches + Historique des scores -->
+      <div class="tv-dashboard-grille tv-grille-fin">
+        <!-- Tableau des manches -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">📈</span>
+            <span>Détail par manche</span>
+          </div>
+          <div class="tv-table-scroll">
+            <table id="tv-tableau-manches" class="tv-tableau-recap"></table>
+          </div>
+        </div>
+
+        <!-- Historique / Carrière des pseudos -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">⭐</span>
+            <span>Carrière des joueurs (scores cumulés)</span>
+          </div>
+          <div id="tv-stats-carriere" class="tv-carriere-liste"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- ÉCRANS TV DU MODE QUICK SPLASH                          -->
+    <!-- ======================================================= -->
+
+    <!-- ÉCRAN TV QS 1 : Setup des amorces -->
+    <section id="tv-qs-setup" class="tv-dashboard cache">
+      <header class="tv-classement-header">
+        <div class="tv-header-gauche">
+          <span class="badge-manche grand qs-badge-neon">⚡ Quick Splash · Étape 1</span>
+          <h2 class="titre-theme-tv">Création des amorces de la soirée</h2>
+        </div>
+        <div class="tv-consignes-ruban">
+          <span>📱 Choisissez sur smartphone : Texte à trous avec "___" ou Question ouverte</span>
+        </div>
+      </header>
+
+      <div class="tv-dashboard-grille">
+        <!-- Colonne 1 : Explications et consignes visuelles -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">✨</span>
+            <span>Formats d'amorces acceptés</span>
+          </div>
+          <div class="tv-qs-explications-box">
+            <div class="tv-qs-explication-carte">
+              <span class="tv-qs-icone-grand">📝</span>
+              <div class="tv-qs-explication-texte">
+                <strong>Texte à trous :</strong>
+                <p>Une phrase courte contenant <code>___</code> (3 tirets) que les autres devront compléter.</p>
+                <div class="tv-qs-exemple-bulle">« Dès que j'arrive en soirée, je bois direct ___ »</div>
+              </div>
+            </div>
+            <div class="tv-qs-explication-carte">
+              <span class="tv-qs-icone-grand">❓</span>
+              <div class="tv-qs-explication-texte">
+                <strong>Question piquante :</strong>
+                <p>Une question sans filtre appelant une réponse concise et drôle.</p>
+                <div class="tv-qs-exemple-bulle">« Qu'est-ce qui ferait fuir n'importe qui à un date ? »</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonne 2 : Statut des joueurs -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">👥</span>
+            <span>Joueurs prêts</span>
+          </div>
+          <div class="tv-progression-barre-box">
+            <p id="tv-qs-compteur-amorces" class="tv-compteur-highlight">0 / 0 amorces reçues</p>
+          </div>
+          <ul id="tv-qs-liste-joueurs-setup" class="tv-grille-joueurs-statut"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN TV QS 2 : Écriture des punchlines (45s chrono) -->
+    <section id="tv-qs-ecriture" class="tv-dashboard cache">
+      <header class="tv-classement-header">
+        <div class="tv-header-gauche">
+          <span id="tv-qs-badge-manche-ecriture" class="badge-manche grand qs-badge-neon">Manche 1 / 4</span>
+          <h2 class="titre-theme-tv">À vos punchlines ! 💥</h2>
+        </div>
+        <div id="tv-qs-chrono-box" class="tv-timer-box tv-qs-timer-box">
+          <span class="icone-timer">⏱️</span>
+          <span id="tv-qs-compteur-chrono" class="tv-timer-texte">45</span>
+          <span class="tv-timer-unite">s</span>
+        </div>
+      </header>
+
+      <!-- Panneau central géant de l'amorce -->
+      <div class="tv-qs-amorce-stage">
+        <div class="tv-qs-amorce-spotlight">
+          <span id="tv-qs-amorce-icone" class="tv-qs-amorce-icone">📝</span>
+          <h3 id="tv-qs-amorce-texte" class="tv-qs-amorce-texte">Chargement de l'amorce...</h3>
+        </div>
+      </div>
+
+      <!-- Table virtuelle où atterrissent les punchlines en direct -->
+      <div class="tv-carte-panneau tv-qs-panneau-table">
+        <div class="tv-panneau-titre">
+          <span class="panneau-icone">🂠</span>
+          <span>Punchlines posées sur la table (<span id="tv-qs-compteur-cartes-posees">0 / 0</span>)</span>
+        </div>
+        <div id="tv-qs-table-cartes" class="tv-qs-table-cartes"></div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN TV QS 3 : Classement & Sniper -->
+    <section id="tv-qs-classement" class="tv-dashboard cache">
+      <header class="tv-classement-header">
+        <div class="tv-header-gauche">
+          <span id="tv-qs-badge-manche-classement" class="badge-manche grand qs-badge-neon">Manche 1 / 4</span>
+          <h2 class="titre-theme-tv">Triez les punchlines sur mobile ! 📱</h2>
+        </div>
+        <div class="tv-consignes-ruban">
+          <span>🥇 #1 = +3 pts (+1.5 si pour soi) · 🥈 #2 = +2 pts · 🥉 #3 = +1 pt · 🤖 Top 2 Bot = -2 pts !</span>
+        </div>
+      </header>
+
+      <div class="tv-dashboard-grille">
+        <!-- Colonne 1 : La table avec les cartes anonymes et le bot mystère -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">🃏</span>
+            <span>Cartes anonymisées en jeu</span>
+          </div>
+          <div class="tv-qs-amorce-rappel-bar">
+            <span>Amorce :</span>
+            <strong id="tv-qs-rappel-amorce-classement">...</strong>
+          </div>
+          <div id="tv-qs-cartes-anonymes-grille" class="tv-qs-cartes-anonymes-grille"></div>
+          <div class="tv-qs-bot-lurk-banner">
+            <span class="bot-icon">🤖</span>
+            <span>Attention : Le <strong>Bot Passe-Partout</strong> a glissé sa carte dans le tas ! Évitez de le mettre dans votre Top 2.</span>
+          </div>
+        </div>
+
+        <!-- Colonne 2 : Avancement des votes -->
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">🎯</span>
+            <span>Classements & Snipers des joueurs</span>
+          </div>
+          <div class="tv-progression-barre-box">
+            <p id="tv-qs-compteur-classes" class="tv-compteur-highlight">0 / 0 classements verrouillés</p>
+          </div>
+          <ul id="tv-qs-liste-joueurs-classement" class="tv-grille-joueurs-statut"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN TV QS 4 : Révélations spectaculaires (Slam / Chute des cartes) -->
+    <section id="tv-qs-revelation" class="tv-dashboard cache">
+      <header class="tv-classement-header">
+        <div class="tv-header-gauche">
+          <span id="tv-qs-badge-manche-revelation" class="badge-manche grand qs-badge-neon">Manche 1 / 4</span>
+          <h2 class="titre-theme-tv">💥 Révélation des Punchlines !</h2>
+        </div>
+        <div class="tv-consignes-ruban" id="tv-qs-amorce-revelation-ruban">
+          <span id="tv-qs-amorce-revelation-texte">Amorce</span>
+        </div>
+      </header>
+
+      <div class="tv-dashboard-grille tv-qs-revelation-grille">
+        <!-- Colonne 1 (Large) : Cartes qui atterrissent du haut avec slam et pastilles -->
+        <div class="tv-carte-panneau tv-qs-panneau-revelations">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">🏆</span>
+            <span>Punchlines de la manche & Auteurs dévoilés</span>
+          </div>
+          <div id="tv-qs-cartes-revelation-liste" class="tv-qs-slam-cartes-liste"></div>
+
+          <!-- Alerte Bot Piège TV -->
+          <div id="tv-qs-alerte-bot-box" class="tv-qs-alerte-bot cache">
+            <div class="tv-qs-bot-header">🚨 PIÈGE DU BOT PASSE-PARTOUT !</div>
+            <div id="tv-qs-bot-victimes" class="tv-qs-bot-victimes"></div>
+          </div>
+
+          <!-- Accusations Sniper TV -->
+          <div id="tv-qs-snipers-box" class="tv-qs-snipers-container cache">
+            <div class="tv-qs-snipers-header">🎯 RÉSULTATS DU JOKER SNIPER :</div>
+            <div id="tv-qs-snipers-liste" class="tv-qs-snipers-liste"></div>
+          </div>
+        </div>
+
+        <!-- Colonne 2 : Classement général après la manche -->
+        <div class="tv-carte-panneau tv-qs-panneau-scores">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">⭐</span>
+            <span>Classement général provisoire</span>
+          </div>
+          <div id="tv-qs-scores-cumules" class="tv-liste-scores-joueurs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN TV QS 5 : Podium Final Quick Splash -->
+    <section id="tv-qs-fin" class="tv-dashboard cache">
+      <header class="tv-classement-header centrer">
+        <h2 class="titre-theme-tv grand-titre qs-titre-podium">🏆 PODIUM FINAL QUICK SPLASH 🏆</h2>
+      </header>
+
+      <!-- Podium Visuel Top 3 géant -->
+      <div id="tv-qs-podium-visuel" class="tv-podium-conteneur tv-qs-podium-conteneur"></div>
+
+      <!-- Trophées humoristiques & Faits marquants -->
+      <div id="tv-qs-zone-trophees" class="tv-zone-trophees"></div>
+
+      <!-- Grille complète du classement final -->
+      <div class="tv-dashboard-grille tv-qs-grille-podium">
+        <div class="tv-carte-panneau">
+          <div class="tv-panneau-titre">
+            <span class="panneau-icone">🎖️</span>
+            <span>Classement de la partie</span>
+          </div>
+          <div id="tv-qs-liste-podium-complet" class="tv-liste-scores-joueurs"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cartes Joker dans l'angle de la TV (disparaissent subtilement) -->
+    <div id="tv-coin-jokers" class="tv-coin-jokers cache">
+      <span class="tv-label-jokers">Jokers :</span>
+      <div id="tv-cartes-jokers" class="tv-paquet-jokers"></div>
+    </div>
+
+    <!-- Barre d'outils TV discrète (Plein écran & Audio) -->
+    <div class="tv-barre-outils">
+      <button id="btn-fullscreen" type="button" class="btn-tv-outil" title="Plein écran (F11)">⛶</button>
+      <button id="btn-son" type="button" class="btn-tv-outil" title="Couper / Activer le son">🔊</button>
+    </div>
+
+    <!-- Modal Modération TV -->
+    <div id="modal-tv" class="modal-chef cache" role="dialog" aria-modal="true">
+      <div class="modal-chef-backdrop" id="modal-tv-backdrop"></div>
+      <div class="modal-chef-contenu">
+        <div class="modal-chef-header">
+          <h3>⚙️ Modération TV</h3>
+          <button id="btn-fermer-modal-tv" type="button" class="btn-fermer-modal" aria-label="Fermer">✕</button>
+        </div>
+        <div id="liste-joueurs-tv" class="liste-joueurs-chef"></div>
+
+        <!-- Catégorie Retour au Lobby -->
+        <div class="modal-chef-section-lobby" id="modal-section-lobby-tv">
+          <hr class="modal-separateur">
+          <p class="modal-section-titre">🏠 Contrôle de la partie</p>
+          <button id="btn-retour-lobby-modal-tv" type="button" class="btn-retour-lobby-modal">
+            <span>🔄</span>
+            <span>Retourner au lobby</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Scoreboard TV (Panthéon des joueurs) -->
+    <div id="modal-scoreboard-tv" class="modal-scoreboard cache" role="dialog" aria-modal="true">
+      <div class="modal-scoreboard-backdrop" id="modal-scoreboard-backdrop"></div>
+      <div class="modal-scoreboard-contenu">
+        <div class="modal-scoreboard-header">
+          <div class="modal-scoreboard-titres">
+            <span class="vip-pill">✨ PANTHÉON DES JOUEURS</span>
+            <h3>🏆 Scoreboard des Habitués</h3>
+          </div>
+          <button id="btn-fermer-modal-scoreboard" type="button" class="btn-fermer-modal" aria-label="Fermer le scoreboard">✕</button>
+        </div>
+
+        <!-- Onglets / Filtres de tri -->
+        <div class="scoreboard-filtres">
+          <span class="filtres-label">Trier par :</span>
+          <div class="scoreboard-tabs-tri" id="scoreboard-tabs-tri">
+            <button type="button" class="tab-tri-btn actif" data-tri="victoires">🏆 Victoires</button>
+            <button type="button" class="tab-tri-btn" data-tri="cameleon">🦎 Le plus normal</button>
+            <button type="button" class="tab-tri-btn" data-tri="incompris">👽 Le plus bizarre</button>
+            <button type="button" class="tab-tri-btn" data-tri="exacts">🎯 Bonnes réponses</button>
+            <button type="button" class="tab-tri-btn" data-tri="parties">🎮 Plus joué</button>
+            <button type="button" class="tab-tri-btn" data-tri="score">⭐ Score total</button>
+          </div>
+        </div>
+
+        <!-- Liste des joueurs classés -->
+        <div id="liste-scoreboard-tv" class="liste-scoreboard-tv"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/audio.js"></script>
+  <script src="/js/confetti.js"></script>
+  <script src="/js/commun.js"></script>
+  <script src="/js/tv.js"></script>
+</body>
+</html>

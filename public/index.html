@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <!-- Mobile-first : pas de zoom involontaire -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0c0824">
+  <title>Priorities</title>
+  <link rel="icon" type="image/jpeg" href="/favicon.jpg">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Fond animé d'ambiance Soirée (Orbes de lumière et bokeh) -->
+  <div class="fond-ambiance-soiree" aria-hidden="true">
+    <div class="orbe orbe-1"></div>
+    <div class="orbe orbe-2"></div>
+  </div>
+
+  <!-- Effet onde de choc multi-anneaux pour changement de mode -->
+  <div id="onde-de-choc-mobile" class="onde-de-choc-conteneur" aria-hidden="true">
+    <div class="onde-flash"></div>
+    <div class="onde-anneau anneau-1"></div>
+    <div class="onde-anneau anneau-2"></div>
+    <div class="onde-anneau anneau-3"></div>
+  </div>
+
+  <main id="app">
+    <header class="mobile-entete-soiree">
+      <button id="btn-roue-chef" type="button" class="btn-roue-chef cache" title="Gestion des joueurs (Chef)" aria-label="Gestion des joueurs">⚙️</button>
+      <button id="btn-switch-mode-mobile" type="button" class="btn-switch-mode-mobile cache" title="Basculer le mode de jeu">🔄</button>
+      <div id="mobile-badge-soiree" class="badge-soiree-mini">🍸 VIBE DE SOIRÉE 🪩</div>
+      <h1 id="mobile-titre-principal" class="titre-soiree-neon">Priorities</h1>
+    </header>
+
+    <!-- ÉCRAN 1 : choix du pseudo -->
+    <section id="ecran-accueil" class="ecran">
+      <p class="sous-titre">Entre ton pseudo pour rejoindre la soirée</p>
+      <form id="form-pseudo" autocomplete="off">
+        <input id="champ-pseudo" type="text" maxlength="16" placeholder="Ton pseudo" required>
+        <button type="submit" class="gros-bouton">Entrer dans la soirée 🍸</button>
+      </form>
+      <p id="erreur-pseudo" class="erreur"></p>
+      <p class="avertissement">⚠️ Contient des thèmes pour public averti (mode hardcore). Ne convient pas aux enfants.</p>
+    </section>
+
+    <!-- ÉCRAN 2 : lobby (salle d'attente) -->
+    <section id="ecran-lobby" class="ecran cache">
+      <p class="sous-titre">Espace VIP • Salle d'attente</p>
+
+      <!-- Carte de mon personnage personnalisable -->
+      <div id="carte-mon-avatar" class="carte-mon-avatar-lobby">
+        <div class="mon-avatar-visuel">
+          <span id="icone-mon-avatar" class="icone-avatar-grand">🍸</span>
+          <button id="btn-ouvrir-selecteur-avatar" type="button" class="btn-crayon-avatar" title="Personnaliser mon avatar">✏️</button>
+        </div>
+        <div class="mon-avatar-infos">
+          <span class="mon-avatar-label">Mon personnage de soirée</span>
+          <span id="mon-pseudo-lobby" class="mon-avatar-pseudo">Moi</span>
+        </div>
+      </div>
+
+      <p id="compteur-joueurs" class="compteur"></p>
+      <ul id="liste-joueurs" class="liste-joueurs-soiree-mobile"></ul>
+
+      <!-- Modal de sélection d'avatar de soirée -->
+      <div id="modal-selecteur-avatar" class="modal-avatar cache">
+        <div class="modal-avatar-overlay"></div>
+        <div class="modal-avatar-contenu">
+          <div class="modal-avatar-header">
+            <h3>Choisis ton style de soirée</h3>
+            <button id="btn-fermer-modal-avatar" type="button" class="btn-fermer-modal">✕</button>
+          </div>
+          <p class="modal-avatar-sous">Touche un avatar pour l'adopter en direct :</p>
+          <div id="grille-choix-avatars" class="grille-choix-avatars"></div>
+        </div>
+      </div>
+
+      <!-- Réservé au chef -->
+      <div id="zone-chef" class="cache">
+        <!-- Choix du mode de jeu (Chef) -->
+        <div class="bloc-selection-mode-chef">
+          <span class="label-mode-chef">Mode de jeu :</span>
+          <button id="btn-toggle-mode-chef" type="button" class="btn-toggle-mode-chef">
+            <span class="icone-switch-mini">🔄</span>
+            <span id="texte-mode-chef">Priorities</span>
+          </button>
+        </div>
+
+        <div id="choix-manches-conteneur">
+          <p class="compteur">Nombre de manches</p>
+          <div class="choix-manches">
+            <button type="button" class="bouton-choix" data-manches="3">3</button>
+            <button type="button" class="bouton-choix" data-manches="4">4</button>
+            <button type="button" class="bouton-choix" data-manches="5">5</button>
+            <button type="button" class="bouton-choix" data-manches="6">6</button>
+          </div>
+        </div>
+        <p id="info-manches-quicksplash" class="info-quicksplash-manches cache">⚡ 1 manche par joueur connecté</p>
+
+        <button id="btn-lancer" type="button" class="gros-bouton">Lancer la soirée 🚀</button>
+        <p id="aide-lancer" class="compteur"></p>
+      </div>
+      <p id="attente-chef" class="compteur cache"></p>
+    </section>
+
+    <!-- ÉCRAN 3 : vote du thème -->
+    <section id="ecran-vote" class="ecran cache">
+      <p class="sous-titre">🗳️ Vote du thème de la partie</p>
+      <div id="liste-themes" class="liste-themes"></div>
+      <p id="compteur-votes" class="compteur"></p>
+      <button id="btn-cloturer" type="button" class="gros-bouton secondaire cache">Clôturer le vote</button>
+    </section>
+
+    <!-- ÉCRAN 4 : annonce du thème gagnant (roulette si égalité) -->
+    <section id="ecran-annonce" class="ecran cache">
+      <div id="zone-annonce" class="zone-annonce"></div>
+    </section>
+
+    <!-- ÉCRAN 5 : Plateau personnel (classement des 5 cartes) -->
+    <section id="ecran-classement" class="ecran cache">
+      <div class="en-tete-manche">
+        <span id="badge-manche" class="badge-manche">Manche 1 / 4</span>
+        <h2 id="titre-theme-manche" class="titre-theme-manche">Thème</h2>
+      </div>
+
+      <!-- Consigne Haut (Vert/Positif) -->
+      <div class="consigne-ruban haut">
+        <span class="icone-sens">⬆️</span>
+        <span id="texte-consigne-haut">Le plus aimé</span>
+      </div>
+
+      <!-- Liste tactile drag-and-drop -->
+      <div id="liste-cartes-mots" class="plateau-cartes"></div>
+
+      <!-- Consigne Bas (Rouge/Négatif) -->
+      <div class="consigne-ruban bas">
+        <span class="icone-sens">⬇️</span>
+        <span id="texte-consigne-bas">Le moins aimé</span>
+      </div>
+
+      <div class="actions-classement-box">
+        <button id="btn-valider-classement" type="button" class="gros-bouton vert">Valider mon classement</button>
+        <button id="btn-reroll-mots" type="button" class="btn-reroll-mots">
+          🎲 Changer de mots (<span id="compteur-reroll">0/0</span>)
+        </button>
+        <div id="liste-avatars-reroll" class="liste-avatars-reroll cache"></div>
+      </div>
+      <p id="info-statut-classement" class="compteur"></p>
+
+      <button id="btn-cloturer-classement" type="button" class="gros-bouton secondaire cache">Clôturer le classement (chef)</button>
+    </section>
+
+    <!-- ÉCRAN 6 : Fin du classement individuel (transition débat) -->
+    <section id="ecran-classement-termine" class="ecran cache">
+      <p class="sous-titre">✨ Classement individuel validé !</p>
+      <div class="carte-info-validee">
+        <p class="emoji-grand">🎯</p>
+        <p>Tous les joueurs ont validé leur classement.</p>
+        <p class="compteur">Lancement de la phase de débat…</p>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 7 : Phase de Débat & Joker secret (Étape 5) -->
+    <section id="ecran-debat" class="ecran cache">
+      <div class="en-tete-manche">
+        <span id="badge-manche-debat" class="badge-manche">Manche 1 / 4</span>
+        <h2 class="titre-theme-manche">🗣️ Débat en direct</h2>
+        <div id="chrono-box-mobile" class="chrono-box-mobile">
+          ⏱️ <span id="chrono-debat-mobile">03:00</span>
+        </div>
+      </div>
+
+      <!-- VUE DU CAPITAINE : ordonner les cartes pour le groupe -->
+      <div id="zone-capitaine" class="cache">
+        <div class="bandeau-role-capitaine">
+          👑 <strong>Tu es le Capitaine !</strong>
+          <p>Discute avec les autres et ordonne les cartes au nom du groupe :</p>
+        </div>
+
+        <div class="consigne-ruban haut">
+          <span>⬆️ Choix n°1 du groupe</span>
+        </div>
+        <div id="liste-cartes-groupe" class="plateau-cartes"></div>
+        <div class="consigne-ruban bas">
+          <span>⬇️ Dernier choix du groupe</span>
+        </div>
+
+        <button id="btn-valider-groupe" type="button" class="gros-bouton vert">Valider le classement du groupe</button>
+      </div>
+
+      <!-- VUE DES AUTRES JOUEURS : débat oral + joker -->
+      <div id="zone-non-capitaine" class="cache">
+        <div class="carte-info-debat">
+          <p class="titre-debat-role">Capitaine : <strong id="pseudo-capitaine-mobile">...</strong></p>
+          <p>Débattez ensemble à l'oral pour convaincre le Capitaine de votre ordre préféré !</p>
+        </div>
+      </div>
+
+      <!-- SECTION JOKER SECRET (Accessible à TOUS si pas encore utilisé) -->
+      <div id="zone-joker" class="carte-joker-box">
+        <div id="bloc-declencher-joker">
+          <p id="texte-statut-joker" class="texte-joker-info">🃏 Tu as 1 joker secret pour toute la partie.</p>
+          <button id="btn-activer-joker" type="button" class="gros-bouton joker">🃏 Utiliser mon Joker (Secret)</button>
+          <p id="delai-joker-info" class="compteur petit">Activable pendant les 2 premières minutes du débat.</p>
+        </div>
+
+        <!-- Interface de modification secrète une fois le joker activé -->
+        <div id="bloc-edition-joker" class="cache">
+          <p class="alerte-joker-actif">🤫 <strong>Joker activé !</strong> Modifie ton classement en secret :</p>
+          <div id="liste-cartes-joker" class="plateau-cartes"></div>
+          <button id="btn-valider-joker" type="button" class="gros-bouton vert">Valider ma modification secrète</button>
+        </div>
+      </div>
+
+      <!-- MINI-RÉACTIONS EN DIRECT SUR LA TÉLÉ PENDANT LE DÉBAT -->
+      <div class="zone-reactions-debat">
+        <p class="titre-reactions-debat">💬 Réagis en direct sur la télé :</p>
+        <div class="grille-reactions-boutons">
+          <button type="button" class="btn-reaction" data-emoji="🔥" data-texte="Trop d'accord">
+            <span class="emoji-reaction">🔥</span>
+            <span class="label-reaction">D'accord</span>
+          </button>
+          <button type="button" class="btn-reaction" data-emoji="💥" data-texte="N'importe quoi !">
+            <span class="emoji-reaction">💥</span>
+            <span class="label-reaction">N'imp !</span>
+          </button>
+          <button type="button" class="btn-reaction" data-emoji="🤡" data-texte="Tu abuses !">
+            <span class="emoji-reaction">🤡</span>
+            <span class="label-reaction">Tu abuses</span>
+          </button>
+          <button type="button" class="btn-reaction" data-emoji="💀" data-texte="C'est un crime !">
+            <span class="emoji-reaction">💀</span>
+            <span class="label-reaction">Crime !</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 8 : Fin du débat (transition résultats) -->
+    <section id="ecran-debat-termine" class="ecran cache">
+      <p class="sous-titre">🏁 Le Capitaine a validé le groupe !</p>
+      <div class="carte-info-validee">
+        <p class="emoji-grand">📊</p>
+        <p>Le débat de cette manche est terminé.</p>
+        <p class="compteur">Calcul des scores en cours…</p>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 9 : Résultats de la manche (Étape 6) -->
+    <section id="ecran-resultats-manche" class="ecran cache">
+      <div class="en-tete-manche">
+        <span id="badge-manche-resultats-mobile" class="badge-manche">Manche 1 / 4</span>
+        <h2 class="titre-theme-manche">📊 Scores de la manche</h2>
+      </div>
+
+      <!-- Carte de score personnelle du joueur -->
+      <div class="carte-score-joueur-mobile">
+        <p class="score-mobile-intro">Tes points cette manche :</p>
+        <div class="score-mobile-valeur-box">
+          <span id="score-manche-joueur" class="points-gain-grand">+0 pts</span>
+          <span id="score-total-joueur" class="points-total-moyen">Total : 0 pts</span>
+        </div>
+      </div>
+
+      <!-- Détail mot par mot vs le consensus groupe -->
+      <h3 class="sous-titre-section">Détail de tes choix</h3>
+      <div id="liste-details-score-mobile" class="liste-details-points"></div>
+
+      <!-- Classement provisoire de la partie -->
+      <h3 class="sous-titre-section">Classement provisoire</h3>
+      <ul id="liste-classement-provisoire-mobile" class="liste-joueurs-provisoire"></ul>
+
+      <!-- Commandes de transition de manche & retour au lobby (Chef uniquement) -->
+      <div id="actions-resultats-chef" class="actions-resultats-box cache">
+        <button id="btn-manche-suivante" type="button" class="gros-bouton vert">Manche suivante ➡️</button>
+        <button id="btn-voir-podium" type="button" class="gros-bouton cache">Voir le podium final 🏆</button>
+        <div class="zone-lien-discret">
+          <button id="btn-retour-lobby-resultats" type="button" class="lien-texte-discret">Retour au lobby</button>
+        </div>
+      </div>
+      <p id="attente-chef-resultats" class="compteur cache">En attente du chef pour passer à la suite…</p>
+    </section>
+
+    <!-- ÉCRAN 10 : Fin de partie & Podium final (Étape 6) -->
+    <section id="ecran-fin-partie" class="ecran cache">
+      <div class="carte-fin-victoire">
+        <span id="icone-fin-partie" class="emoji-tres-grand">🏆</span>
+        <h2 id="titre-fin-partie" class="titre-theme-manche">Partie terminée !</h2>
+        <p id="texte-rang-final" class="texte-rang-final">Tu termines #1 avec 45 pts</p>
+      </div>
+
+      <h3 class="sous-titre-section">Classement final</h3>
+      <ul id="liste-podium-mobile" class="liste-podium-mobile"></ul>
+
+      <!-- Trophées humoristiques de fin de partie -->
+      <h3 class="sous-titre-section">Trophées de la partie</h3>
+      <div id="liste-trophees-mobile" class="liste-trophees-mobile"></div>
+
+      <!-- Carrière du joueur (data/scores.json) -->
+      <div id="bloc-carriere-mobile" class="bloc-carriere-mobile"></div>
+
+      <div id="actions-fin-chef" class="actions-resultats-box cache">
+        <button id="btn-rejouer-lobby" type="button" class="gros-bouton">Nouvelle partie (retour au lobby) 🔄</button>
+      </div>
+      <p id="attente-chef-fin" class="compteur cache">En attente du chef pour relancer une partie…</p>
+    </section>
+
+    <!-- ======================================================= -->
+    <!-- ÉCRANS DU MODE QUICK SPLASH (Mobile)                    -->
+    <!-- ======================================================= -->
+
+    <!-- ÉCRAN QS 1 : Setup de l'amorce (Texte à trous ou Question) -->
+    <section id="ecran-qs-setup" class="ecran cache">
+      <div class="en-tete-manche">
+        <span class="badge-manche qs-badge-neon">⚡ Quick Splash</span>
+        <h2 class="titre-theme-manche">Crée ton amorce</h2>
+      </div>
+
+      <div class="qs-bloc-choix-type">
+        <p class="qs-label-type">Choisis le format de ta punchline :</p>
+        <div class="qs-boutons-type">
+          <button id="btn-qs-type-trou" type="button" class="btn-qs-type actif">
+            <span class="icone-type">📝</span>
+            <span class="texte-type">Texte à trous</span>
+            <span class="sous-type">avec ___</span>
+          </button>
+          <button id="btn-qs-type-question" type="button" class="btn-qs-type">
+            <span class="icone-type">❓</span>
+            <span class="texte-type">Question</span>
+            <span class="sous-type">bien piquante</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="qs-zone-saisie-box">
+        <div class="qs-saisie-header">
+          <span id="qs-hint-type" class="qs-hint-type">Remplis avec 3 tirets ___</span>
+          <button id="btn-qs-magique" type="button" class="btn-qs-magique" title="Piocher une idée">
+            ✨ Idée magique
+          </button>
+        </div>
+        <textarea id="qs-input-amorce" class="qs-textarea" rows="3" maxlength="140" placeholder="Ex: Ce soir, la soiree part en vrille des que ___"></textarea>
+        <div class="qs-saisie-compteur"><span id="qs-compteur-caracteres-amorce">0</span>/140</div>
+      </div>
+
+      <div id="qs-actions-setup" class="actions-classement-box">
+        <button id="btn-qs-valider-amorce" type="button" class="gros-bouton qs-btn-gradient">Valider mon amorce 🚀</button>
+      </div>
+
+      <div id="qs-attente-setup" class="carte-info-validee cache">
+        <p class="emoji-grand">⏳</p>
+        <p><strong>Amorce envoyée !</strong></p>
+        <p id="qs-statut-amorces-attente" class="compteur">En attente des autres joueurs…</p>
+      </div>
+    </section>
+
+    <!-- ÉCRAN QS 2 : Écriture de la punchline (45s chrono) -->
+    <section id="ecran-qs-ecriture" class="ecran cache">
+      <div class="en-tete-manche">
+        <span id="qs-badge-manche-ecriture" class="badge-manche qs-badge-neon">Manche 1 / 4</span>
+        <div id="qs-chrono-ecriture-box" class="qs-chrono-box">
+          ⏱️ <span id="qs-chrono-ecriture">45</span>s
+        </div>
+      </div>
+
+      <div class="qs-carte-amorce-centrale">
+        <span id="qs-icone-amorce" class="qs-icone-amorce">📝</span>
+        <p id="qs-texte-amorce" class="qs-texte-amorce">La phrase ou question ici</p>
+      </div>
+
+      <div id="qs-zone-saisie-reponse" class="qs-zone-reponse-box">
+        <label for="qs-input-reponse" class="qs-label-reponse">Ta punchline la plus drôle :</label>
+        <textarea id="qs-input-reponse" class="qs-textarea" rows="2" maxlength="100" placeholder="Sois vif, court et sans filtre..."></textarea>
+        <div class="qs-saisie-compteur"><span id="qs-compteur-caracteres-reponse">0</span>/100</div>
+
+        <button id="btn-qs-valider-reponse" type="button" class="gros-bouton qs-btn-gradient">Envoyer ma réponse 💥</button>
+      </div>
+
+      <div id="qs-attente-ecriture" class="carte-info-validee cache">
+        <p class="emoji-grand">📺</p>
+        <p><strong>Ta réponse s'est envolée vers la télé !</strong></p>
+        <p class="compteur">En attente de la fin du compte à rebours…</p>
+      </div>
+    </section>
+
+    <!-- ÉCRAN QS 3 : Classement des réponses et Joker Sniper -->
+    <section id="ecran-qs-classement" class="ecran cache">
+      <div class="en-tete-manche">
+        <span id="qs-badge-manche-classement" class="badge-manche qs-badge-neon">Manche 1 / 4</span>
+        <h2 class="titre-theme-manche">Classe les punchlines !</h2>
+      </div>
+
+      <div class="qs-rappel-amorce">
+        <span class="qs-rappel-label">Amorce :</span>
+        <span id="qs-texte-rappel-classement" class="qs-rappel-texte">...</span>
+      </div>
+
+      <div class="consigne-ruban haut qs-ruban-haut">
+        <span class="icone-sens">🥇</span>
+        <span>Le plus drôle (#1 = +3 pts / +1.5 si pour soi)</span>
+      </div>
+
+      <div id="qs-liste-cartes-classement" class="plateau-cartes qs-plateau-cartes"></div>
+
+      <div class="consigne-ruban bas qs-ruban-bas">
+        <span class="icone-sens">⬇️</span>
+        <span>Le moins drôle / Hors sujet</span>
+      </div>
+
+      <!-- Joker Sniper (secret) -->
+      <div class="qs-sniper-box">
+        <button id="btn-qs-ouvrir-sniper" type="button" class="btn-qs-sniper">
+          🎯 Joker Sniper (Accuser un auteur)
+        </button>
+        <div id="qs-sniper-resume" class="qs-sniper-resume cache">
+          <span class="sniper-cible-label">🎯 Accusation posée :</span>
+          <span id="qs-sniper-resume-texte" class="sniper-cible-texte">Tu accuses ...</span>
+          <button id="btn-qs-annuler-sniper" type="button" class="btn-annuler-sniper" title="Annuler">✕</button>
+        </div>
+      </div>
+
+      <div class="actions-classement-box">
+        <button id="btn-qs-valider-classement" type="button" class="gros-bouton qs-btn-gradient">Valider mon classement 🏆</button>
+      </div>
+
+      <div id="qs-attente-classement" class="carte-info-validee cache">
+        <p class="emoji-grand">🔒</p>
+        <p><strong>Classement verrouillé !</strong></p>
+        <p id="qs-statut-classements-attente" class="compteur">En attente des autres joueurs…</p>
+      </div>
+    </section>
+
+    <!-- Modal Joker Sniper -->
+    <div id="modal-qs-sniper" class="modal-chef cache" role="dialog" aria-modal="true">
+      <div class="modal-chef-backdrop" id="modal-qs-sniper-backdrop"></div>
+      <div class="modal-chef-contenu qs-modal-sniper-contenu">
+        <div class="modal-chef-header">
+          <h3>🎯 Joker Sniper</h3>
+          <button id="btn-fermer-modal-sniper" type="button" class="btn-fermer-modal" aria-label="Fermer">✕</button>
+        </div>
+        <p class="qs-sniper-regles">
+          Désigne une punchline et accuse son auteur !<br>
+          <span class="sniper-vert">✅ Trouvé : +2 pts pour toi, -1 pt pour lui</span><br>
+          <span class="sniper-rouge">❌ Raté : -1 pt pour toi</span>
+        </p>
+
+        <label class="qs-modal-label">1. Choisis la punchline cible :</label>
+        <select id="qs-select-sniper-carte" class="qs-select-input"></select>
+
+        <label class="qs-modal-label">2. Accuse un joueur :</label>
+        <select id="qs-select-sniper-joueur" class="qs-select-input"></select>
+
+        <div class="qs-modal-boutons">
+          <button id="btn-qs-confirmer-sniper" type="button" class="gros-bouton qs-btn-gradient">Confirmer le tir 🎯</button>
+          <button id="btn-qs-fermer-sniper" type="button" class="btn-texte-secondaire">Annuler</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÉCRAN QS 4 : Révélations & Scores de la manche -->
+    <section id="ecran-qs-revelation" class="ecran cache">
+      <div class="en-tete-manche">
+        <span id="qs-badge-manche-revelation" class="badge-manche qs-badge-neon">Manche 1 / 4</span>
+        <h2 class="titre-theme-manche">💥 Révélation des punchlines</h2>
+      </div>
+
+      <!-- Récapitulatif personnel immédiat -->
+      <div class="carte-score-joueur-mobile qs-carte-score-mobile">
+        <p class="score-mobile-intro">Tes points cette manche :</p>
+        <div class="score-mobile-valeur-box">
+          <span id="qs-score-manche-joueur" class="points-gain-grand">+0 pts</span>
+          <span id="qs-score-total-joueur" class="points-total-moyen">Total : 0 pts</span>
+        </div>
+        <div id="qs-alertes-manche-joueur" class="qs-alertes-joueur"></div>
+      </div>
+
+      <!-- Cartes révélées avec slam animation et pastilles de points -->
+      <h3 class="sous-titre-section">Punchlines & Auteurs révélés</h3>
+      <div id="qs-liste-cartes-revelees" class="qs-cartes-slam-liste"></div>
+
+      <!-- Alerte Bot Piège globale -->
+      <div id="qs-alerte-bot-box" class="qs-alerte-bot-box cache">
+        <div class="qs-alerte-bot-header">🤖 Le Bot Passe-Partout a frappé !</div>
+        <div id="qs-alerte-bot-texte" class="qs-alerte-bot-texte"></div>
+      </div>
+
+      <!-- Snipers résolus -->
+      <div id="qs-liste-snipers-resolus" class="qs-snipers-liste cache"></div>
+
+      <!-- Classement provisoire Quick Splash -->
+      <h3 class="sous-titre-section">Classement provisoire</h3>
+      <ul id="qs-classement-provisoire" class="liste-joueurs-provisoire"></ul>
+
+      <!-- Commandes Chef -->
+      <div id="qs-actions-revelation-chef" class="actions-resultats-box cache">
+        <button id="btn-qs-manche-suivante" type="button" class="gros-bouton qs-btn-gradient">Manche suivante ➡️</button>
+        <button id="btn-qs-voir-podium" type="button" class="gros-bouton qs-btn-gradient cache">Voir le podium final 🏆</button>
+        <div class="zone-lien-discret">
+          <button id="btn-qs-retour-lobby-revelation" type="button" class="lien-texte-discret">Retour au lobby</button>
+        </div>
+      </div>
+      <p id="qs-attente-chef-revelation" class="compteur cache">En attente du chef pour passer à la suite…</p>
+    </section>
+
+    <!-- ÉCRAN QS 5 : Podium final Quick Splash -->
+    <section id="ecran-qs-fin" class="ecran cache">
+      <div class="carte-fin-victoire qs-carte-victoire">
+        <span class="emoji-tres-grand">🏆</span>
+        <h2 class="titre-theme-manche qs-titre-podium">Podium Quick Splash !</h2>
+        <p id="qs-texte-rang-final" class="texte-rang-final">Tu termines #1 avec 12 pts</p>
+      </div>
+
+      <!-- Podium Visuel Top 3 Mobile -->
+      <div id="qs-podium-visuel-mobile" class="podium-mobile-visuel"></div>
+
+      <!-- Trophées humoristiques & Faits marquants Mobile -->
+      <div class="section-trophees-mobile">
+        <h4>Trophées & Faits marquants</h4>
+        <div id="qs-liste-trophees-mobile" class="liste-trophees-mobile"></div>
+      </div>
+
+      <h3 class="sous-titre-section">Classement final</h3>
+      <ul id="qs-liste-podium-final" class="liste-podium-mobile"></ul>
+
+      <div id="qs-actions-fin-chef" class="actions-resultats-box cache">
+        <button id="btn-qs-rejouer-lobby" type="button" class="gros-bouton qs-btn-gradient">Nouvelle partie (retour au lobby) 🔄</button>
+      </div>
+      <p id="qs-attente-chef-fin" class="compteur cache">En attente du chef pour relancer une partie…</p>
+    </section>
+
+    <p id="statut" class="statut"></p>
+
+    <!-- Modal Gestion des joueurs (Chef) -->
+    <div id="modal-chef" class="modal-chef cache" role="dialog" aria-modal="true">
+      <div class="modal-chef-backdrop" id="modal-chef-backdrop"></div>
+      <div class="modal-chef-contenu">
+        <div class="modal-chef-header">
+          <h3>👑 Gestion des joueurs</h3>
+          <button id="btn-fermer-modal-chef" type="button" class="btn-fermer-modal" aria-label="Fermer">✕</button>
+        </div>
+        <p class="modal-chef-intro">Actions réservées au chef de la partie :</p>
+        <div id="liste-joueurs-chef" class="liste-joueurs-chef"></div>
+
+        <!-- Catégorie Retour au Lobby -->
+        <div class="modal-chef-section-lobby" id="modal-section-lobby-chef">
+          <hr class="modal-separateur">
+          <p class="modal-section-titre">🏠 Contrôle de la partie</p>
+          <button id="btn-retour-lobby-modal-chef" type="button" class="btn-retour-lobby-modal">
+            <span>🔄</span>
+            <span>Retourner au lobby</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/lib/sortable/Sortable.min.js"></script>
+  <script src="/js/audio.js"></script>
+  <script src="/js/confetti.js"></script>
+  <script src="/js/commun.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "kylian": {
+    "pseudo": "Kylian",
+    "partiesJouees": 1,
+    "scoreTotal": 1,
+    "victoires": 1,
+    "meilleureManche": 1,
+    "meilleurePartie": 1,
+    "dernierePartie": "2026-10-07T15:22:13.453Z"
+  },
+  "jerome": {
+    "pseudo": "Jerome",
+    "partiesJouees": 1,
+    "scoreTotal": 1,
+    "victoires": 1,
+    "meilleureManche": 1,
+    "meilleurePartie": 1,
+    "dernierePartie": "2026-10-07T13:50:29.656Z"
+  },
+  "nathan": {
+    "pseudo": "nathan",
+    "partiesJouees": 1,
+    "scoreTotal": 1,
+    "victoires": 1,
+    "meilleureManche": 1,
+    "meilleurePartie": 1,
+    "dernierePartie": "2026-10-07T15:22:13.453Z"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "priorities-local",
+  "version": "1.0.0",
+  "description": "Jeu Priorities en réseau local (web app mobile-first)",
+  "main": "server.js",
+  "bin": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:exe": "pkg . --targets node22-win-x64 --output dist/priorities.exe"
+  },
+  "pkg": {
+    "assets": [
+      "public/**/*",
+      "data/**/*"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.1",
+    "sortablejs": "^1.15.6"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.23.0"
+  }
+}
